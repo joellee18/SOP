@@ -175,8 +175,8 @@ void straight_forward_medium(void)
 
 void straight_forward_slow(void)
 {
-    set_motor_speed(left, slow, -200); 
-    set_motor_speed(right, slow, -200);
+    set_motor_speed(left, slow, -100); 
+    set_motor_speed(right, slow, -100);
 }
 
 void straight_stop(void)
@@ -187,14 +187,14 @@ void straight_stop(void)
 
 void straight_reverse_slow(void)
 {
-    set_motor_speed(left, rev_slow, -200); 
-    set_motor_speed(right, rev_slow, -200);
+    set_motor_speed(left, rev_slow, 100); 
+    set_motor_speed(right, rev_slow, 100);
 }
 
 void straight_reverse_medium(void)
 {
-    set_motor_speed(left, rev_medium, -100); 
-    set_motor_speed(right, rev_medium, -100);
+    set_motor_speed(left, rev_medium, 100); 
+    set_motor_speed(right, rev_medium, 100);
 }
 
 void straight_reverse_fast(void)
