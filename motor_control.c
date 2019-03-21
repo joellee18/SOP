@@ -3,6 +3,8 @@
 #include "motor_control.h"
 
 void follow_simple_curves(void);
+void follow_right_angle_turn(void);
+
 void spin_left(void);
 void turn_left(void);
 void straight_fwd(void);
@@ -21,16 +23,53 @@ void default_settings(void);
 
 void motor_control(void)
 {
-    
+    //very simple motor control
+     switch(SeeLine.B)      //defined sumovore.h > struct sensors
+                            //                   > union sensors_union
+                            //                   > extern union union_sensor SeeLine
+     {
+        case 0b00100u:      //Center
+        case 0b00010u:      //CntRight
+        case 0b01000u:      //CntLeft
+        case 0b00001u:      //Right
+        case 0b10000u:      //Left
+                       //no breaks all above readings end up here
+                       follow_simple_curves();
+                       break;
+                       
+        case 0b00111u:
+        case 0b01111u:    
+        case 0b01100u: 
+        case 0b00110u:    
+        case 0b11100u:
+                       follow_right_angle_turn();
+                       break;
+                       
+        case 0b00000u:      //no sensors on
+                        motors_brake_all();
+                       break;
+        default:       break;
+      } 
 }
 
 void follow_simple_curves(void)
 {
-     if ( SeeLine.b.Center ) straight_fwd();
-     else if (SeeLine.b.Left) spin_left();
-     else if (SeeLine.b.CntLeft) turn_left();
-     else if (SeeLine.b.CntRight) turn_right();
-    else if (SeeLine.b.Right) spin_right();
+     if ( SeeLine.b.Center ) straight_fwd();        //sensors bit 2, 0b00100u
+     else if (SeeLine.b.Left) spin_left();          //sensors bit 4, 0b10000u
+     else if (SeeLine.b.CntLeft) turn_left();       //sensors bit 3, 0b01000u
+     else if (SeeLine.b.CntRight) turn_right();     //sensors bit 1, 0b00010u
+     else if (SeeLine.b.Right) spin_right();        //sensors bit 0, 0b00001u
+}
+
+void follow_right_angle_turn(void)
+{
+    if (SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) spin_right();
+    else if (SeeLine.b.CntLeft && SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) straight_fwd();
+    else if (SeeLine.b.Center && SeeLine.b.CntRight) spin_right();
+    
+    else if (SeeLine.b.Center && SeeLine.b.CntLeft && SeeLine.b.Left) spin_left();
+    //else if (SeeLine.b.CntLeft && SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) spin_right();
+    else if (SeeLine.b.Center && SeeLine.b.CntLeft) spin_left();
 }
 
 void spin_left(void)
@@ -60,6 +99,33 @@ void turn_right(void)
   set_motor_speed(right, stop, 0); 
 }
 
+
+//void spin_left(void)
+//{
+//  set_motor_speed(left, rev_fast, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//
+//void turn_left(void)
+//{
+//  set_motor_speed(left, stop, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void straight_fwd(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void spin_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, rev_fast, 0); //
+//}
+//void turn_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, stop, 0); //
+//}
 //******
 
 void straight_forward_fast(void)
@@ -164,21 +230,5 @@ void default_settings(void)
     {
         straight_stop();
     }
-    
-     very simple motor control
-     switch(SeeLine.B)
-     {
-        case 0b00100u:
-        case 0b00010u:
-        case 0b01000u:
-        case 0b00001u:
-        case 0b10000u:
-                       no breaks all above readings end up here
-                       follow_simple_curves();
-                       break;
-        case 0b00000u:
-                        motors_brake_all();
-                       break;
-        default:       break;
-      } 
+ 
 }
