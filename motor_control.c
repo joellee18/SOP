@@ -4,6 +4,10 @@
 
 void follow_simple_curves(void);
 void follow_right_angle_turn(void);
+void follow_acute_angle_turn(void);
+
+unsigned char left_counter(unsigned char left_value);
+unsigned char right_counter(unsigned char right_value);
 
 void spin_left(void);
 void turn_left(void);
@@ -20,36 +24,70 @@ void straight_reverse_medium(void);
 void straight_reverse_fast(void);
 
 void default_settings(void);
+//unsigned char last_sense = 0b00000u;
+unsigned char last_sense_left = 0b00000000u;
+unsigned char last_sense_right = 0b00000000u;
+unsigned char right_value, left_value;
 
 void motor_control(void)
 {
-    //very simple motor control
-     switch(SeeLine.B)      //defined sumovore.h > struct sensors
-                            //                   > union sensors_union
-                            //                   > extern union union_sensor SeeLine
-     {
-        case 0b00100u:      //Center
-        case 0b00010u:      //CntRight
-        case 0b01000u:      //CntLeft
-        case 0b00001u:      //Right
-        case 0b10000u:      //Left
-                       //no breaks all above readings end up here
-                       follow_simple_curves();
-                       break;
-                       
-        case 0b00111u:
-        case 0b01111u:    
-        case 0b01100u: 
-        case 0b00110u:    
-        case 0b11100u:
-                       follow_right_angle_turn();
-                       break;
-                       
-        case 0b00000u:      //no sensors on
-                        motors_brake_all();
-                       break;
-        default:       break;
-      } 
+    follow_simple_curves();
+    left_counter(left_value);
+    right_counter(right_value);
+    follow_right_angle_turn();
+    follow_acute_angle_turn();
+     //very simple motor control
+//     switch(SeeLine.B)      //defined sumovore.h > struct sensors
+//                            //                   > union sensors_union
+//                            //                   > extern union union_sensor SeeLine
+//     {
+//        case 0b00100u:      //Center
+//        case 0b00010u:      //CntRight
+//        case 0b01000u:      //CntLeft
+//        case 0b00001u:      //Right
+//        case 0b10000u:      //Left
+//                       //no breaks all above readings end up here
+//                       left_counter(0);
+//                       right_counter(0);
+//                       follow_simple_curves();
+//                       break;
+//                       
+//  
+//        case 0b11100u: 
+//        case 0b00111u:    
+//   
+//                         left_counter(left_value);
+//                         right_counter(right_value);
+//                         follow_right_angle_turn();
+////                       follow_acute_angle_turn();
+//                       break;
+//
+//        case 0b00000u:      //no sensors on
+//                        motors_brake_all();
+//                       break;
+//        default:       break;
+//      } 
+}
+
+
+unsigned char right_counter(unsigned char right_value)
+{
+    if (SeeLine.B == 0b00111u)
+    {
+        //straight_fwd();
+        right_value++;
+    }
+    return right_value;
+}
+
+unsigned char left_counter(unsigned char left_value)
+{
+    if (SeeLine.B == 0b11100u)
+    {
+        //straight_fwd();
+        left_value++;
+    }
+    return left_value;
 }
 
 void follow_simple_curves(void)
@@ -63,13 +101,53 @@ void follow_simple_curves(void)
 
 void follow_right_angle_turn(void)
 {
-    if (SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) spin_right();
-    else if (SeeLine.b.CntLeft && SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) straight_fwd();
-    else if (SeeLine.b.Center && SeeLine.b.CntRight) spin_right();
+    unsigned char detect_right_value = 0, detect_left_value = 0;
     
-    else if (SeeLine.b.Center && SeeLine.b.CntLeft && SeeLine.b.Left) spin_left();
-    //else if (SeeLine.b.CntLeft && SeeLine.b.Center && SeeLine.b.CntRight && SeeLine.b.Right) spin_right();
-    else if (SeeLine.b.Center && SeeLine.b.CntLeft) spin_left();
+    detect_right_value = right_counter(right_value);
+    detect_left_value = left_counter(left_value);
+    
+    if (detect_right_value > detect_left_value)
+    {
+        spin_right;
+        right_counter(0);
+        left_counter(0);
+    }
+    else if (detect_right_value < detect_left_value)
+    {
+        spin_left;
+        right_counter(0);
+        left_counter(0);
+    }
+    else if (detect_right_value == detect_left_value)
+    {
+        straight_fwd;  
+        right_counter(0);
+        left_counter(0);
+    }
+    
+}
+
+void follow_acute_angle_turn(void)
+{
+//    if (SeeLine.B == 0b00101u) SeeLine.B = last_sense;
+//    {
+//        straight_fwd();
+//        for (int i=0; i<25; i++)  //
+//            _delay(100000ul); //  1/80 s
+//        spin_right();
+//        for (int i=0; i<40; i++)  //
+//            _delay(100000ul); //  1/80 s
+//    }
+//    
+//    if (SeeLine.B == 0b10100u) SeeLine.B = last_sense;
+//    {
+//        straight_fwd();
+//        for (int i=0; i<60; i++)  //
+//            _delay(100000ul); //  1/80 s
+//        spin_left();
+//        for (int i=0; i<40; i++)  //
+//            _delay(100000ul); //  1/80 s
+//    }
 }
 
 void spin_left(void)
