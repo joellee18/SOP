@@ -34,39 +34,34 @@ unsigned char pick_counter = 0;
 
 void motor_control(void)
 {   
-    switch(pick_counter)
+    follow_simple_curves();
+    follow_right_angle_turn();
+    follow_acute_angle_turn();
+    left_counter2(left_value2);
+    right_counter2(right_value2);
+    left_counter3(left_value3);
+    right_counter3(right_value3);
+    all_counter(all_value);  
+   
+    if (SeeLine.B == 0b11111u)
     {
-        default:
-                follow_simple_curves();
-                left_counter2(left_value2);
-                right_counter2(right_value2);
-                left_counter3(left_value3);
-                right_counter3(right_value3);
-                all_counter(all_value);
-                
-                if (left_value3 > 0)
-                    pick_counter = 3;
-                else if (right_value3 > 0)
-                    pick_counter = 3;
-                else if (all_value)
-                    pick_counter = 5;
-                else if (left_value2 > 0)
-                    pick_counter = 2;
-                else if (right_value2 > 0)
-                    pick_counter = 2;
-                
-                break;
-        case 3:
-                follow_right_angle_turn();
-                break;
-        case 5: 
-                follow_stop();
-                break;
-        case 2:
-                follow_acute_angle_turn();
-                break;
-        
-    }                    
+        if (SeeLine.B == 0b11111u)
+        {
+            straight_stop();
+            
+            for(int i = 0; i<100 ; i++)     //1.25 sec
+                _delay(100000ul);
+            motors_brake_all();
+        }
+    }
+    
+//    
+//    if (SeeLine.B == 0b00000u)
+//    {
+//        
+//    }
+//   
+                  
 }
 
 unsigned char left_counter2(unsigned char left_value2)
@@ -100,7 +95,7 @@ unsigned char right_counter3(unsigned char right_value3)
     if (SeeLine.B == 0b00111u)
         right_value3++;
 
-   return right_value3;
+   return right_value3; 
 }
 
 unsigned char all_counter(unsigned char all_value)
