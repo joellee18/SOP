@@ -5,9 +5,13 @@
 void follow_simple_curves(void);
 void follow_right_angle_turn(void);
 void follow_acute_angle_turn(void);
+void follow_stop(void);
 
-unsigned char left_counter(unsigned char left_value);
-unsigned char right_counter(unsigned char right_value);
+unsigned char left_counter2(unsigned char left_value2);
+unsigned char right_counter2(unsigned char right_value2);
+unsigned char left_counter3(unsigned char left_value3);
+unsigned char right_counter3(unsigned char right_value3);
+unsigned char all_counter(unsigned char all_value);
 
 void spin_left(void);
 void turn_left(void);
@@ -22,72 +26,90 @@ void straight_stop(void);
 void straight_reverse_slow(void);
 void straight_reverse_medium(void);
 void straight_reverse_fast(void);
-
 void default_settings(void);
-//unsigned char last_sense = 0b00000u;
-unsigned char last_sense_left = 0b00000000u;
-unsigned char last_sense_right = 0b00000000u;
-unsigned char right_value, left_value;
+
+unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0;
+unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0;
+unsigned char pick_counter = 0;
 
 void motor_control(void)
-{
-    follow_simple_curves();
-    left_counter(left_value);
-    right_counter(right_value);
-    follow_right_angle_turn();
-    follow_acute_angle_turn();
-     //very simple motor control
-//     switch(SeeLine.B)      //defined sumovore.h > struct sensors
-//                            //                   > union sensors_union
-//                            //                   > extern union union_sensor SeeLine
-//     {
-//        case 0b00100u:      //Center
-//        case 0b00010u:      //CntRight
-//        case 0b01000u:      //CntLeft
-//        case 0b00001u:      //Right
-//        case 0b10000u:      //Left
-//                       //no breaks all above readings end up here
-//                       left_counter(0);
-//                       right_counter(0);
-//                       follow_simple_curves();
-//                       break;
-//                       
-//  
-//        case 0b11100u: 
-//        case 0b00111u:    
-//   
-//                         left_counter(left_value);
-//                         right_counter(right_value);
-//                         follow_right_angle_turn();
-////                       follow_acute_angle_turn();
-//                       break;
-//
-//        case 0b00000u:      //no sensors on
-//                        motors_brake_all();
-//                       break;
-//        default:       break;
-//      } 
-}
-
-
-unsigned char right_counter(unsigned char right_value)
-{
-    if (SeeLine.B == 0b00111u)
+{   
+    switch(pick_counter)
     {
-        //straight_fwd();
-        right_value++;
-    }
-    return right_value;
+        default:
+                follow_simple_curves();
+                left_counter2(left_value2);
+                right_counter2(right_value2);
+                left_counter3(left_value3);
+                right_counter3(right_value3);
+                all_counter(all_value);
+                
+                if (left_value3 > 0)
+                    pick_counter = 3;
+                else if (right_value3 > 0)
+                    pick_counter = 3;
+                else if (all_value)
+                    pick_counter = 5;
+                else if (left_value2 > 0)
+                    pick_counter = 2;
+                else if (right_value2 > 0)
+                    pick_counter = 2;
+                
+                break;
+        case 3:
+                follow_right_angle_turn();
+                break;
+        case 5: 
+                follow_stop();
+                break;
+        case 2:
+                follow_acute_angle_turn();
+                break;
+        
+    }                    
 }
 
-unsigned char left_counter(unsigned char left_value)
+unsigned char left_counter2(unsigned char left_value2)
+{
+    if (SeeLine.B == 0b01100u)
+    {
+        left_value2++;
+    }
+    return left_value2;
+}
+
+unsigned char right_counter2(unsigned char right_value2)
+{
+    if (SeeLine.B == 0b00110u)
+    {
+        right_value2++;
+    }
+    return right_value2;
+}
+
+unsigned char left_counter3(unsigned char left_value3)
 {
     if (SeeLine.B == 0b11100u)
+        left_value3++;
+    
+    return left_value3;
+}
+
+unsigned char right_counter3(unsigned char right_value3)
+{
+    if (SeeLine.B == 0b00111u)
+        right_value3++;
+
+   return right_value3;
+}
+
+unsigned char all_counter(unsigned char all_value)
+{
+    if (SeeLine.B == 0b11111u)
     {
-        //straight_fwd();
-        left_value++;
+        all_value++;
     }
-    return left_value;
+    return all_value;
 }
 
 void follow_simple_curves(void)
@@ -101,54 +123,70 @@ void follow_simple_curves(void)
 
 void follow_right_angle_turn(void)
 {
-    unsigned char detect_right_value = 0, detect_left_value = 0;
+    detect_right_value3 = right_counter3(right_value3);
+    detect_left_value3 = left_counter3(left_value3);
     
-    detect_right_value = right_counter(right_value);
-    detect_left_value = left_counter(left_value);
-    
-    if (detect_right_value > detect_left_value)
+    if (detect_right_value3 > detect_left_value3)
     {
         spin_right;
-        right_counter(0);
-        left_counter(0);
+        right_counter3(0);
+        left_counter3(0);
     }
-    else if (detect_right_value < detect_left_value)
+    else if (detect_right_value3 < detect_left_value3)
     {
         spin_left;
-        right_counter(0);
-        left_counter(0);
+        right_counter3(0);
+        left_counter3(0);
     }
-    else if (detect_right_value == detect_left_value)
+    else if (detect_right_value3 == detect_left_value3)
     {
         straight_fwd;  
-        right_counter(0);
-        left_counter(0);
+        right_counter3(0);
+        left_counter3(0);
     }
-    
+
 }
 
 void follow_acute_angle_turn(void)
 {
-//    if (SeeLine.B == 0b00101u) SeeLine.B = last_sense;
-//    {
-//        straight_fwd();
-//        for (int i=0; i<25; i++)  //
-//            _delay(100000ul); //  1/80 s
-//        spin_right();
-//        for (int i=0; i<40; i++)  //
-//            _delay(100000ul); //  1/80 s
-//    }
-//    
-//    if (SeeLine.B == 0b10100u) SeeLine.B = last_sense;
-//    {
-//        straight_fwd();
-//        for (int i=0; i<60; i++)  //
-//            _delay(100000ul); //  1/80 s
-//        spin_left();
-//        for (int i=0; i<40; i++)  //
-//            _delay(100000ul); //  1/80 s
-//    }
+    detect_right_value2 = right_counter2(right_value2);
+    detect_left_value2 = left_counter2(left_value2);
+    
+    if (detect_right_value2 > detect_left_value2)
+    {
+        spin_right;
+        right_counter2(0);
+        left_counter2(0);
+    }
+    else if (detect_right_value2 < detect_left_value2)
+    {
+        spin_left;
+        right_counter2(0);
+        left_counter2(0);
+    }
+    else if (detect_right_value2 == detect_left_value2)
+    {
+        straight_fwd;  
+        right_counter2(0);
+        left_counter2(0);
+    }
+
 }
+
+void follow_stop(void)
+{
+    detect_all_value = all_counter(all_value);
+
+    if (detect_all_value > 10)
+    {
+        straight_stop();
+        all_counter(0);
+        right_counter3(0);
+        left_counter3(0);
+    }
+    
+}
+
 
 void spin_left(void)
 {
@@ -176,7 +214,6 @@ void turn_right(void)
   set_motor_speed(left, fast, 0); 
   set_motor_speed(right, stop, 0); 
 }
-
 
 //void spin_left(void)
 //{
