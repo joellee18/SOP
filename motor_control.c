@@ -42,16 +42,37 @@ void motor_control(void)
     left_counter3(left_value3);
     right_counter3(right_value3);
     all_counter(all_value);  
-   
+    
+    //stops
+    
+    
     if (SeeLine.B == 0b11111u)
     {
+        set_motor_speed(left, medium, -100); 
+        set_motor_speed(right, medium, -100);
+        //keep going through crossovers
+        
+        //sense the next "all 5 sensors on" after
+        for (int j = 0; j < 50; j++)    // 0.625 s
+            _delay(100000ul);           // 1/80 s
+
+        //if, after 0.625 s, it's still "all 5 sensors on"
         if (SeeLine.B == 0b11111u)
         {
-            straight_stop();
-            
-            for(int i = 0; i<100 ; i++)     //1.25 sec
+            //go fast for 0.375 sec "distance of landing pad"
+            straight_forward_fast();
+            for (int i = 0 ; i < 30; i++)
                 _delay(100000ul);
-            motors_brake_all();
+            
+            if (SeeLine.B == 0b11111u)
+            {
+                straight_stop();
+
+                motors_brake_all();
+
+                while(1)
+                    _delay(100000ul);
+            }
         }
     }
     
