@@ -1,0 +1,506 @@
+#include <xc.h>
+#include "sumovore.h"
+#include "motor_control.h"
+#define line 0
+#define noline 1
+void follow_simple_curves(void);
+void follow_right_angle_turn(void);
+void follow_acute_angle_turn(void);
+//void follow_stop(void);
+void follow_gaps(void);
+void follow_dead_end(void);
+
+unsigned char left_counter2(unsigned char left_value2);
+unsigned char right_counter2(unsigned char right_value2);
+unsigned char left_counter3(unsigned char left_value3);
+unsigned char right_counter3(unsigned char right_value3);
+unsigned char all_counter(unsigned char all_value);
+unsigned char none_counter(unsigned char none_value);
+
+unsigned char last_sensor_value;
+unsigned char monitor_sensor_for_edges(unsigned char input_sensor);
+
+void spin_left(void);
+void turn_left(void);
+void straight_fwd(void);
+void turn_right(void);
+void spin_right(void);
+
+void straight_forward_fast(void);
+void straight_forward_medium(void);
+void straight_forward_slow(void);
+void straight_stop(void);
+void straight_reverse_slow(void);
+void straight_reverse_medium(void);
+void straight_reverse_fast(void);
+void default_settings(void);
+
+unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0, none_value = 0;
+unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0, detect_none_value;
+unsigned char inital = line, final = line;
+
+
+
+void motor_control(void)
+{   
+//    left_counter2(left_value2);
+//    right_counter2(right_value2);
+//    left_counter3(left_value3);
+//    right_counter3(right_value3);
+//    all_counter(all_value);  
+//    none_counter(none_value);     
+    
+    follow_simple_curves();
+    follow_right_angle_turn();
+    follow_acute_angle_turn();
+    follow_gaps();
+    if (SeeLine.B == 0b11111u)
+        straight_stop();
+}
+
+   
+    //will come back later for landing pad stop
+//    if (SeeLine.B == 0b11111u)
+//    {
+//        if (SeeLine.B == 0b11111u)
+//        {
+//            follow_simple_curves();
+//            
+//            //FAKE FOLLOW_SIMPLE_CURVES(); IT'S SLOWER btw
+//            
+//            for(int i = 0; i<14 ; i++)     //1.25 sec
+//            {
+//                _delay(36000ul);
+//            }
+//            motors_brake_all();
+//        }
+//    }
+    
+    //GAP TIME
+//    if (SeeLine.B == 0b00000u)
+//    {
+//        straight_forward_fast();
+//        
+//        for (int j = 0; j < 40; j++)      // 0.5 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        motors_brake_all();
+//        for (int j = 0; j < 20; j++)      // 0.25 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        if (SeeLine.B == 0b00000u)
+//        {
+//            straight_reverse_fast();
+//
+//            for (int j = 0; j < 40; j++)      // 0.5 s
+//                _delay(100000ul);           // 1/80s
+//
+//            spin_right();
+//
+//            for (int j = 0; j < 55; j++)      // 0.25 s
+//            _delay(100000ul);           // 1/80s
+//
+//            if (SeeLine.b.Center)
+//            {
+//                follow_simple_curves();
+//            }
+//        }
+//
+//    }
+                  
+
+unsigned char left_counter2(unsigned char left_value2)
+{
+    if (SeeLine.B == 0b01100u)
+    {
+        left_value2++;
+    }
+    return left_value2;
+}
+
+unsigned char right_counter2(unsigned char right_value2)
+{
+    if (SeeLine.B == 0b00110u)
+    {
+        right_value2++;
+    }
+    return right_value2;
+}
+
+unsigned char left_counter3(unsigned char left_value3)
+{
+    if (SeeLine.B == 0b11100u)
+        left_value3++;
+    
+    return left_value3;
+}
+
+unsigned char right_counter3(unsigned char right_value3)
+{
+    if (SeeLine.B == 0b00111u)
+        right_value3++;
+
+   return right_value3; 
+}
+
+unsigned char all_counter(unsigned char all_value)
+{
+    if (SeeLine.B == 0b11111u)
+    {
+        all_value++;
+    }
+    return all_value;
+}
+
+//unsigned char none_counter(unsigned char none_value)
+//{
+////    char has_sensor_changed = 0;
+////    
+////    has_sensor_changed = monitor_sensor_for_edges(SeeLine.B);
+////    
+////    if (has_sensor_changed == 1) //if rising edge detected
+////        none_value++;
+////    
+////    if (none_value = 3)
+////        none_value = 1;
+////    if (SeeLine.B == 0b00000u)
+////    {
+////        //follow_simple_curves();
+////        straight_forward_slow();
+////        none_value++;
+//////        for (int a = 0 ; a <40 ; a++)
+//////            _delay(100000ul);
+////    }
+//    
+//    return none_value;
+//}
+
+void follow_simple_curves(void)
+{
+     if ( SeeLine.b.Center ) straight_fwd();        //sensors bit 2, 0b00100u
+     else if (SeeLine.b.Left) spin_left();          //sensors bit 4, 0b10000u
+     else if (SeeLine.b.CntLeft) turn_left();       //sensors bit 3, 0b01000u
+     else if (SeeLine.b.CntRight) turn_right();     //sensors bit 1, 0b00010u
+     else if (SeeLine.b.Right) spin_right();        //sensors bit 0, 0b00001u
+}
+
+void follow_right_angle_turn(void)
+{
+    detect_right_value3 = right_counter3(right_value3);
+    detect_left_value3 = left_counter3(left_value3);
+    
+    if (detect_right_value3 > detect_left_value3)
+    {
+        spin_right;
+        right_counter3(0);
+        left_counter3(0);
+    }
+    else if (detect_right_value3 < detect_left_value3)
+    {
+        spin_left;
+        right_counter3(0);
+        left_counter3(0);
+    }
+    else if (detect_right_value3 == detect_left_value3)
+    {
+        straight_fwd;  
+        right_counter3(0);
+        left_counter3(0);
+    }
+
+}
+
+void follow_acute_angle_turn(void)
+{
+    detect_right_value2 = right_counter2(right_value2);
+    detect_left_value2 = left_counter2(left_value2);
+    
+    if (detect_right_value2 > detect_left_value2)
+    {
+        spin_right;
+        right_counter2(0);
+        left_counter2(0);
+    }
+    else if (detect_right_value2 < detect_left_value2)
+    {
+        spin_left;
+        right_counter2(0);
+        left_counter2(0);
+    }
+    else if (detect_right_value2 == detect_left_value2)
+    {
+        straight_fwd;  
+        right_counter2(0);
+        left_counter2(0);
+    }
+
+}
+
+void follow_gaps(void)
+{
+
+    if ((SeeLine.B == 0b00000u) && (inital == line))
+    {
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
+    
+        WriteTimer0(30000);
+        TMR0IF = 0;
+        
+        while(!TMR0IF)
+        {
+            
+            straight_forward_slow();
+        }
+        
+        inital = noline;
+    }
+    
+    if ((SeeLine.B == 0b00000u) && (inital == noline))
+    {
+//        follow_dead_end();
+        // 1/80s
+
+//        straight_reverse_medium();
+//        for(int i=0; i > 100; i++)
+//            _delay(100000ul);
+//        spin_right();
+//        for(int i=0; i > 55; i++)
+//            _delay(100000ul);
+
+        final = noline;
+    }   
+//    
+//    
+    else if ((SeeLine.B != 0b00000u) && (inital == noline))
+    {
+        final = line;
+    }
+    
+    if ((inital = noline) && (final = noline))
+    {
+        straight_reverse_medium();
+        for(int i=0; i > 100; i++)
+            _delay(100000ul);
+//        inital = line;
+//        final = line;
+    }
+    
+//    if ((SeeLine.B != 0b00000u) && (tomato == 1) && (grape == 1))
+//    {
+//        motors_brake_all();
+//        spin_right();
+//        for(int i=0; i > 55; i++)
+//            _delay(100000ul);
+//        tomato = 0;
+//    }
+    
+}
+
+void follow_dead_end(void)
+{
+    motors_brake_all();
+    for (int j = 0; j < 20; j++)      // 0.25 s
+        _delay(100000ul);           // 1/80s
+
+    straight_reverse_fast();
+    for (int j = 0; j < 40; j++)      // 0.5 s
+        _delay(100000ul);           // 1/80s
+
+    spin_right();
+    for (int j = 0; j < 55; j++)      // 0.25 s
+    _delay(100000ul);   
+    
+        
+}
+
+//void follow_gaps(void)
+//{
+////    detect_none_value = none_counter(none_value);
+//    
+////    if (detect_none_value == 0)
+////    {
+////        follow_simple_curves();
+////    }
+////    
+////    if (detect_none_value == 1)     //if rising edge
+////    {
+////        follow_simple_curves();
+////    }
+//    if (SeeLine.B == 0b00000u)
+//    {
+//        none_value = 1;
+//        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
+//    
+//        WriteTimer0(0);
+//        TMR0IF = 0;
+//        
+//        while(!TMR0IF)
+//        {
+//            
+//            straight_forward_slow();
+//        }
+//        
+//    }
+//    
+//    if ((none_value == 1) && (SeeLine.B == 0b00000u))
+//        motors_brake_all();
+//    
+////    if (detect_none_value > 0)     //if there are 2 rising edges
+////    {
+////        motors_brake_all();
+////        while(1)
+////            _delay(100000ul);
+////        straight_forward_fast();
+////        
+////        for (int j = 0; j < 40; j++)      // 0.5 s
+////            _delay(100000ul);           // 1/80s
+////        
+////        motors_brake_all();
+////        for (int k = 0; k < 20; k++)      // 0.25 s
+////            _delay(100000ul);           // 1/80s
+////        
+////        straight_reverse_fast();
+////        for (int l = 0; l < 40; l++)      // 0.5 s
+////            _delay(100000ul);           // 1/80s
+////
+////        spin_right();
+////        for (int m = 0; m < 55; m++)      // 0.25 s
+////        _delay(100000ul);           // 1/80s
+////
+////        if (SeeLine.b.Center)
+////        {
+////            follow_simple_curves();
+////        }
+////    } 
+//}
+
+unsigned char monitor_sensor_for_edges(unsigned char input_sensor) 
+{ 
+    last_sensor_value = 0b00100u;
+    unsigned char has_sensor_changed = 0;  // 0 = no change; 1 = rising edge; 1 = falling edge
+
+    if ((last_sensor_value != 0b00000u) && (input_sensor == 0b00000u))
+    {                // rising edge detected if digitalinputpin is 1 (on) 
+        last_sensor_value = 0b00100u;   // save current switch value (on)
+        has_sensor_changed = 1;  // found a rising edge
+    } 
+//    if ((last_sensor_value == 0b00000u) && (input_sensor != 0b00000u)) 
+//    {                // falling edge detected if digitalinputpin is 0 (off) 
+//        last_sensor_value = 0b00100u;   // save current switch value (off)
+//        has_sensor_changed = 2;  // found a falling edge
+//    } 
+
+    return has_sensor_changed; 
+}
+
+void follow_stop(void)
+{
+    detect_all_value = all_counter(all_value);
+
+    if (detect_all_value > 10)
+    {
+        straight_stop();
+        all_counter(0);
+        right_counter3(0);
+        left_counter3(0);
+    }
+    
+}
+
+
+void spin_left(void)
+{
+  set_motor_speed(left, rev_fast, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+
+void turn_left(void)
+{
+  set_motor_speed(left, stop, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+void straight_fwd(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+void spin_right(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, rev_fast, 0); 
+}
+void turn_right(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, stop, 0); 
+}
+
+//void spin_left(void)
+//{
+//  set_motor_speed(left, rev_fast, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//
+//void turn_left(void)
+//{
+//  set_motor_speed(left, stop, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void straight_fwd(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void spin_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, rev_fast, 0); //
+//}
+//void turn_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, stop, 0); //
+//}
+//******
+
+void straight_forward_fast(void)
+{
+    set_motor_speed(left, fast, -100); 
+    set_motor_speed(right, fast, 0);
+}
+
+void straight_forward_medium(void)
+{
+    set_motor_speed(left, medium, -100); 
+    set_motor_speed(right, medium, -120);
+}
+
+void straight_forward_slow(void)
+{
+    set_motor_speed(left, slow, -100); 
+    set_motor_speed(right, slow, -117);
+}
+
+void straight_stop(void)
+{
+    set_motor_speed(left, stop, 0); 
+    set_motor_speed(right, stop, 0);
+}
+
+void straight_reverse_slow(void)
+{
+    set_motor_speed(left, rev_slow, 100); 
+    set_motor_speed(right, rev_slow, 130);
+}
+
+void straight_reverse_medium(void)
+{
+    set_motor_speed(left, rev_medium, 100); 
+    set_motor_speed(right, rev_medium, 127);
+}
+
+void straight_reverse_fast(void)
+{
+    set_motor_speed(left, rev_fast, 0); 
+    set_motor_speed(right, rev_fast, 0);
+}
