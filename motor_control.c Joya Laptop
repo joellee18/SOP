@@ -15,6 +15,10 @@ unsigned char right_counter3(unsigned char right_value3);
 unsigned char all_counter(unsigned char all_value);
 unsigned char none_counter(unsigned char none_value);
 
+unsigned char last_sensor_value;
+unsigned char monitor_sensor_for_edges(unsigned char input_sensor);
+char has_sensor_changed = 0;
+
 void spin_left(void);
 void turn_left(void);
 void straight_fwd(void);
@@ -44,7 +48,9 @@ void motor_control(void)
     left_counter3(left_value3);
     right_counter3(right_value3);
     all_counter(all_value);  
-    //none_counter(none_value);
+    none_counter(none_value);
+    
+    follow_gaps();
    
     //will come back later for landing pad stop
 //    if (SeeLine.B == 0b11111u)
@@ -64,36 +70,36 @@ void motor_control(void)
 //    }
     
     //GAP TIME
-    if (SeeLine.B == 0b00000u)
-    {
-        straight_forward_fast();
-        
-        for (int j = 0; j < 40; j++)      // 0.5 s
-            _delay(100000ul);           // 1/80s
-        
-        motors_brake_all();
-        for (int j = 0; j < 20; j++)      // 0.25 s
-            _delay(100000ul);           // 1/80s
-        
-        if (SeeLine.B == 0b00000u)
-        {
-            straight_reverse_fast();
-
-            for (int j = 0; j < 40; j++)      // 0.5 s
-                _delay(100000ul);           // 1/80s
-
-            spin_right();
-
-            for (int j = 0; j < 55; j++)      // 0.25 s
-            _delay(100000ul);           // 1/80s
-
-            if (SeeLine.b.Center)
-            {
-                follow_simple_curves();
-            }
-        }
-
-    }
+//    if (SeeLine.B == 0b00000u)
+//    {
+//        straight_forward_fast();
+//        
+//        for (int j = 0; j < 40; j++)      // 0.5 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        motors_brake_all();
+//        for (int j = 0; j < 20; j++)      // 0.25 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        if (SeeLine.B == 0b00000u)
+//        {
+//            straight_reverse_fast();
+//
+//            for (int j = 0; j < 40; j++)      // 0.5 s
+//                _delay(100000ul);           // 1/80s
+//
+//            spin_right();
+//
+//            for (int j = 0; j < 55; j++)      // 0.25 s
+//            _delay(100000ul);           // 1/80s
+//
+//            if (SeeLine.b.Center)
+//            {
+//                follow_simple_curves();
+//            }
+//        }
+//
+//    }
                   
 }
 
@@ -138,6 +144,19 @@ unsigned char all_counter(unsigned char all_value)
         all_value++;
     }
     return all_value;
+}
+
+unsigned char none_counter(unsigned char none_value)
+{
+    has_sensor_changed = monitor_sensor_for_edges(SeeLine.B);
+    
+    if (has_sensor_changed == 1) //if rising edge detected
+        none_value++;
+    
+//    if (none_value > 2)
+//        none_value = 1;
+    
+    return none_value;
 }
 
 void follow_simple_curves(void)
@@ -205,8 +224,57 @@ void follow_gaps(void)
 {
     detect_none_value = none_counter(none_value);
     
-    if (detect_none_value == 1)
-        follow_simple_line();
+    if (detect_none_value == 1)     //if rising edge
+    {
+        straight_reverse_slow();
+    }
+    
+    if (detect_none_value == 2)     //if there are 2 rising edges
+    {
+//        straight_forward_fast();
+//        
+//        for (int j = 0; j < 40; j++)      // 0.5 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        motors_brake_all();
+//        for (int k = 0; k < 20; k++)      // 0.25 s
+//            _delay(100000ul);           // 1/80s
+//        
+//        straight_reverse_fast();
+//        for (int j = 0; j < 40; j++)      // 0.5 s
+//            _delay(100000ul);           // 1/80s
+//
+//        spin_right();
+//        for (int j = 0; j < 55; j++)      // 0.25 s
+//        _delay(100000ul);           // 1/80s
+//
+//        if (SeeLine.b.Center)
+//        {
+//            follow_simple_curves();
+//        }
+        straight_reverse_medium();
+        
+        detect_none_value = 0;
+    } 
+}
+
+unsigned char monitor_sensor_for_edges(unsigned char input_sensor) 
+{ 
+    last_sensor_value = 0b00100u;
+    unsigned char has_sensor_changed = 0;  // 0 = no change; 1 = rising edge; 1 = falling edge
+
+    if ((last_sensor_value != 0b00000u) && (input_sensor == 0b00000u))
+    {                // rising edge detected if digitalinputpin is 1 (on) 
+        last_sensor_value = input_sensor;   // save current switch value (on)
+        has_sensor_changed = 1;  // found a rising edge
+    } 
+    if ((last_sensor_value == 0b00000u) && (input_sensor != 0b00000u)) 
+    {                // falling edge detected if digitalinputpin is 0 (off) 
+        last_sensor_value = input_sensor;   // save current switch value (off)
+        has_sensor_changed = 2;  // found a falling edge
+    } 
+
+    return has_sensor_changed; 
 }
 
 //void follow_stop(void)
