@@ -6,12 +6,14 @@ void follow_simple_curves(void);
 void follow_right_angle_turn(void);
 void follow_acute_angle_turn(void);
 //void follow_stop(void);
+void follow_gaps(void);
 
 unsigned char left_counter2(unsigned char left_value2);
 unsigned char right_counter2(unsigned char right_value2);
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
 unsigned char all_counter(unsigned char all_value);
+unsigned char none_counter(unsigned char none_value);
 
 void spin_left(void);
 void turn_left(void);
@@ -28,9 +30,9 @@ void straight_reverse_medium(void);
 void straight_reverse_fast(void);
 void default_settings(void);
 
-unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0;
-unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0;
-unsigned char pick_counter = 0;
+unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0, none_value = 0;
+unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0, detect_none_value = 0;
+
 
 void motor_control(void)
 {   
@@ -42,6 +44,7 @@ void motor_control(void)
     left_counter3(left_value3);
     right_counter3(right_value3);
     all_counter(all_value);  
+    //none_counter(none_value);
    
     //will come back later for landing pad stop
 //    if (SeeLine.B == 0b11111u)
@@ -196,6 +199,14 @@ void follow_acute_angle_turn(void)
         left_counter2(0);
     }
 
+}
+
+void follow_gaps(void)
+{
+    detect_none_value = none_counter(none_value);
+    
+    if (detect_none_value == 1)
+        follow_simple_line();
 }
 
 //void follow_stop(void)
