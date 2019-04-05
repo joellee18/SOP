@@ -156,14 +156,14 @@ void follow_gaps(void)
     
     if ((SeeLine.B == 0b00000u) && (grape == 0))
     {
-        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
-        WriteTimer0(0);
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
+        WriteTimer0(21845);
         TMR0IF = 0;
         
         while(!TMR0IF)
         {
             
-            straight_forward_slow();
+            straight_forward_fast();
         }
         grape = 1;
         berry = 0;
