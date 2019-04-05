@@ -177,19 +177,19 @@ void follow_gaps(void)
 //        grape = 0;
 //    }
 //    
-    if ((SeeLine.B == 0b00000u) && (grape == 1) && (berry == 0))
-    {
-        straight_reverse_fast();
-        for(int i=0; i > 55; i++)
-            _delay(100000ul);
+//    if ((SeeLine.B == 0b00000u) && (grape == 1) && (berry == 0))
+//    {
+//        straight_reverse_fast();
+//        for(int i=0; i > 55; i++)
+//            _delay(100000ul);
 //        grape = 0;
-    }   
+//    }   
     
-    if ((SeeLine.B != 0b00000u) && (grape == 1))
-    {
-        grape = 0;
-        berry = 1;
-    }
+//    if ((SeeLine.B != 0b00000u) && (grape == 1))
+//    {
+//        grape = 0;
+//        berry = 1;
+//    }
 
 }
 
