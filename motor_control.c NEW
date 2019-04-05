@@ -8,14 +8,12 @@ void follow_acute_angle_turn(void);
 void follow_landing_pad(void);
 void follow_gaps(void);
 
-unsigned char left_counter2(unsigned char left_value2);
-unsigned char right_counter2(unsigned char right_value2);
+
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
-//unsigned char all_counter(unsigned char all_value);
-unsigned char none_counter(unsigned char none_value);
 
 unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0;
+unsigned char grape = 0, berry = 0;
 
 void spin_left(void);
 void turn_left(void);
@@ -38,89 +36,15 @@ unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value
 
 void motor_control(void)
 {   
+    left_counter3(left_value3);
+    right_counter3(right_value3); 
+    
     follow_simple_curves();
     follow_right_angle_turn();
     follow_acute_angle_turn();
     follow_landing_pad();
-    left_counter2(left_value2);
-    right_counter2(right_value2);
-    left_counter3(left_value3);
-    right_counter3(right_value3);
-//    all_counter(all_value);  
-    //none_counter(none_value);
-   
-    //will come back later for landing pad stop
-//    if (SeeLine.B == 0b11111u)
-//    {
-//        if (SeeLine.B == 0b11111u)
-//        {
-//            follow_simple_curves();
-//            
-//            //FAKE FOLLOW_SIMPLE_CURVES(); IT'S SLOWER btw
-//            
-//            for(int i = 0; i<14 ; i++)     //1.25 sec
-//            {
-//                _delay(36000ul);
-//            }
-//            motors_brake_all();
-//        }
-//    }
-    
-//    //GAP TIME
-//    if (SeeLine.B == 0b00000u)
-//    {
-//        straight_forward_fast();
-//        
-//        for (int j = 0; j < 40; j++)      // 0.5 s
-//            _delay(100000ul);           // 1/80s
-//        
-//        motors_brake_all();
-//        for (int j = 0; j < 20; j++)      // 0.25 s
-//            _delay(100000ul);           // 1/80s
-//        
-//        if (SeeLine.B == 0b00000u)
-//        {
-//            
-//            if (SeeLine.b.Center)
-//            {
-//                follow_simple_curves();
-//            }
-//            
-//            if (SeeLine.B == 0b00000u)
-//            {
-//                straight_reverse_fast();
-//
-//                for (int j = 0; j < 40; j++)      // 0.5 s
-//                    _delay(100000ul);           // 1/80s
-//
-//                spin_right();
-//
-//                for (int j = 0; j < 55; j++)      // 0.25 s
-//                _delay(100000ul);           // 1/80s
-//            }
-//
-//        }
-//
-//    }
-                  
-}
-
-unsigned char left_counter2(unsigned char left_value2)
-{
-    if (SeeLine.B == 0b01100u)
-    {
-        left_value2++;
-    }
-    return left_value2;
-}
-
-unsigned char right_counter2(unsigned char right_value2)
-{
-    if (SeeLine.B == 0b00110u)
-    {
-        right_value2++;
-    }
-    return right_value2;
+    follow_gaps();
+        
 }
 
 unsigned char left_counter3(unsigned char left_value3)
@@ -138,15 +62,6 @@ unsigned char right_counter3(unsigned char right_value3)
 
    return right_value3; 
 }
-//
-//unsigned char all_counter(unsigned char all_value)
-//{
-//    if (SeeLine.B == 0b11111u)
-//    {
-//        all_value++;
-//    }
-//    return all_value;
-//}
 
 void follow_simple_curves(void)
 {
@@ -238,16 +153,42 @@ void follow_acute_angle_turn(void)
 
 void follow_gaps(void)
 {
-    if (SeeLine.B == 0b00000u)
+    
+    if ((SeeLine.B == 0b00000u) && (grape == 0))
     {
-        none_value = 1;
-        straight_forward_slow();
-        for (int i=0; i < 40; i++)
-            _delay(100000ul);
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
+        WriteTimer0(0);
+        TMR0IF = 0;
+        
+        while(!TMR0IF)
+        {
+            
+            straight_forward_slow();
+        }
+        grape = 1;
+        berry = 0;
     }
-    if ((SeeLine.B == 0b00000u) && (none_value == 1))
+//    
+//    if (grape == 2)
+//    {
+//        spin_right();
+//        for(int i=0; i > 55; i++)
+//            _delay(100000ul);
+//        grape = 0;
+//    }
+//    
+    if ((SeeLine.B == 0b00000u) && (grape == 1) && (berry == 0))
     {
-        motors_brake_all();
+        straight_reverse_fast();
+        for(int i=0; i > 55; i++)
+            _delay(100000ul);
+//        grape = 0;
+    }   
+    
+    if ((SeeLine.B != 0b00000u) && (grape == 1))
+    {
+        grape = 0;
+        berry = 1;
     }
 
 }
