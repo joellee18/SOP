@@ -8,12 +8,10 @@ void follow_acute_angle_turn(void);
 void follow_landing_pad(void);
 void follow_gaps(void);
 
-
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
 
-unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0;
-unsigned char grape = 0, berry = 0;
+unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0, grape = 0, tomato = 0;
 
 void spin_left(void);
 void turn_left(void);
@@ -30,21 +28,18 @@ void straight_reverse_medium(void);
 void straight_reverse_fast(void);
 void default_settings(void);
 
-unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0, none_value = 0;
-unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0, detect_none_value = 0;
+unsigned char left_value3 = 0, right_value3 = 0;
+unsigned char detect_left_value3 = 0, detect_right_value3 = 0;
 
 
 void motor_control(void)
 {   
     left_counter3(left_value3);
-    right_counter3(right_value3); 
-    
+    right_counter3(right_value3);
     follow_simple_curves();
     follow_right_angle_turn();
     follow_acute_angle_turn();
-    follow_landing_pad();
-    //follow_gaps();
-        
+    follow_landing_pad();                
 }
 
 unsigned char left_counter3(unsigned char left_value3)
@@ -62,6 +57,15 @@ unsigned char right_counter3(unsigned char right_value3)
 
    return right_value3; 
 }
+//
+//unsigned char all_counter(unsigned char all_value)
+//{
+//    if (SeeLine.B == 0b11111u)
+//    {
+//        all_value++;
+//    }
+//    return all_value;
+//}
 
 void follow_simple_curves(void)
 {
@@ -100,7 +104,7 @@ void follow_right_angle_turn(void)
 
 void follow_acute_angle_turn(void)
 {
-    if (SeeLine.B == 0b10100u)
+    if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
     {
        straight_forward_slow();
        _delay(100000ul);
@@ -108,7 +112,7 @@ void follow_acute_angle_turn(void)
        BANANA = 1;
     } 
     
-    if (SeeLine.B == 0b00101u)
+    if ((SeeLine.B == 0b00101u)||(SeeLine.B == 0b01111u))
     {
        straight_forward_slow();
        _delay(100000ul);
@@ -153,44 +157,52 @@ void follow_acute_angle_turn(void)
 
 void follow_gaps(void)
 {
-    
-    if ((SeeLine.B == 0b00000u) && (grape == 0))
+    if (SeeLine.B == 0b00000u && grape > 0)
     {
-        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
-        WriteTimer0(21845);
+        motors_brake_all();
+    }
+    
+    if (SeeLine.B == 0b00000u && grape > 0)
+    {
+        follow_simple_curves();
+    }
+    
+    if (SeeLine.B == 0b00000u)
+    {
+        grape++;
+        
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+    
+        WriteTimer0(0);
         TMR0IF = 0;
         
         while(!TMR0IF)
         {
-            
-            straight_forward_fast();
+            straight_forward_slow();
         }
-        grape = 1;
-        berry = 0;
     }
-//    
-//    if (grape == 2)
-//    {
-//        spin_right();
-//        for(int i=0; i > 55; i++)
-//            _delay(100000ul);
-//        grape = 0;
-//    }
-//    
-//    if ((SeeLine.B == 0b00000u) && (grape == 1) && (berry == 0))
-//    {
-//        straight_reverse_fast();
-//        for(int i=0; i > 55; i++)
-//            _delay(100000ul);
-//        grape = 0;
-//    }   
     
-//    if ((SeeLine.B != 0b00000u) && (grape == 1))
+    
+//    if ((SeeLine.B == 0b00000u) && (grape == 1))
 //    {
-//        grape = 0;
-//        berry = 1;
-//    }
-
+//        motors_brake_all();
+//        straight_reverse_fast();
+//        for(int i=0; i > 40; i++)
+//            _delay(100000ul);
+//        spin_right();
+//        for(int i=0; i > 40; i++)
+//            _delay(100000ul);
+        
+//        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
+//    
+//        WriteTimer0(0);
+//        TMR0IF = 0;
+//        
+//        while(!TMR0IF)
+//        {
+//            straight_forward_slow();
+//        }
+//    }    
 }
 
 void follow_landing_pad(void)
@@ -224,7 +236,6 @@ void follow_landing_pad(void)
         KIWI = 0;
     }    
 }
-
 
 void spin_left(void)
 {
