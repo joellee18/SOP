@@ -100,7 +100,8 @@ void follow_right_angle_turn(void)
         right_counter3(0);
         left_counter3(0);
     }
-
+//    for (int j = 0; j < 15; j++)      // s
+//             _delay(100000ul);
 }
 
 void follow_acute_angle_turn(void)
@@ -120,6 +121,7 @@ void follow_acute_angle_turn(void)
        
        CHERRY = 1;
     }
+
     
 //    if (SeeLine.B == 0b11100u)
 //    {
@@ -130,12 +132,12 @@ void follow_acute_angle_turn(void)
 //    {
 //        ORANGE = 1;
 //    }
-//    
+    
     if ( SeeLine.B == 0b00000u && BANANA == 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
          set_motor_speed(left, rev_fast, 0); 
          set_motor_speed(right, fast, 0);
-         for (int j = 0; j < 35; j++)      // 0.5 s
+         for (int j = 0; j < 30; j++)      // 0.5 s
              _delay(100000ul);
 
          follow_simple_curves();
@@ -147,13 +149,34 @@ void follow_acute_angle_turn(void)
     {
          set_motor_speed(left, fast, 0); 
          set_motor_speed(right, rev_fast, 0);
-         for (int j = 0; j < 35; j++)      // 0.5 s
+         for (int j = 0; j < 30; j++)      // 0.5 s
              _delay(100000ul);
 
          follow_simple_curves();
          
          CHERRY = 0;
     }
+
+//    if (BANANA == 1 || CHERRY == 1)
+//    {
+//        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //0.75 second
+//
+//        WriteTimer0(16384);
+//        TMR0IF = 0;
+//
+//        while(!TMR0IF)
+//        {
+//            follow_simple_curves();
+//        }
+////            for (int i = 0 ; i < 57 ; i++)
+////                _delay(100000ul);
+//        
+//        if (SeeLine.B != 0b00000u)
+//        {
+//            BANANA = 0;
+//            CHERRY = 0;
+//        }
+//    }
 }
 
 void follow_gaps(void)
@@ -172,19 +195,14 @@ void follow_gaps(void)
     {
         grape++;
         
-        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_64);     //1 second
-    
-        WriteTimer0(0);
-        TMR0IF = 0;
+        straight_forward_fast();
         
-        while(!TMR0IF)
-        {
-            straight_forward_slow();
-        }
+//        for( int i = 0; i <20 ; i++)
+//            _delay(100000ul);
     }
     
     
-//    if ((SeeLine.B == 0b00000u) && (grape == 1))
+//    if ((SeeLine.B == 0b00000u) && (grape == 1) && (BANANA == 0) && (CHERRY == 0))
 //    {
 //        motors_brake_all();
 //        straight_reverse_fast();
@@ -193,7 +211,7 @@ void follow_gaps(void)
 //        spin_right();
 //        for(int i=0; i > 40; i++)
 //            _delay(100000ul);
-        
+//        
 //        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
 //    
 //        WriteTimer0(0);
