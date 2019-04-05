@@ -39,7 +39,8 @@ void motor_control(void)
     follow_simple_curves();
     follow_right_angle_turn();
     follow_acute_angle_turn();
-    follow_landing_pad();                
+    follow_landing_pad(); 
+    //follow_gaps();
 }
 
 unsigned char left_counter3(unsigned char left_value3)
@@ -157,21 +158,21 @@ void follow_acute_angle_turn(void)
 
 void follow_gaps(void)
 {
-    if (SeeLine.B == 0b00000u && grape > 0)
-    {
-        motors_brake_all();
-    }
-    
-    if (SeeLine.B == 0b00000u && grape > 0)
-    {
-        follow_simple_curves();
-    }
+//    if (SeeLine.B == 0b00000u && grape > 0)
+//    {
+//        motors_brake_all();
+//    }
+//    
+//    if (SeeLine.B == 0b00000u && grape > 0)
+//    {
+//        follow_simple_curves();
+//    }
     
     if (SeeLine.B == 0b00000u)
     {
         grape++;
         
-        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_64);     //1 second
     
         WriteTimer0(0);
         TMR0IF = 0;
