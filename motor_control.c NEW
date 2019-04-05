@@ -43,7 +43,7 @@ void motor_control(void)
     follow_right_angle_turn();
     follow_acute_angle_turn();
     follow_landing_pad();
-    follow_gaps();
+    //follow_gaps();
         
 }
 
