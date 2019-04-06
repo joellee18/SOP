@@ -4,6 +4,7 @@
 
 void follow_simple_curves(void);
 void follow_right_angle_turn(void);
+void follow_crossover(void);
 void follow_acute_angle_turn(void);
 void follow_landing_pad(void);
 void follow_gaps(void);
@@ -29,7 +30,6 @@ void straight_reverse_fast(void);
 void default_settings(void);
 
 unsigned char left_value3 = 0, right_value3 = 0;
-unsigned char detect_left_value3 = 0, detect_right_value3 = 0;
 
 
 void motor_control(void)
@@ -70,32 +70,21 @@ unsigned char right_counter3(unsigned char right_value3)
 
 void follow_simple_curves(void)
 {
-        if ( SeeLine.b.Center )
-        {
-            straight_fwd();        //sensors bit 2, 0b00100u
-            _delay(100000ul);
-            _delay(100000ul);
-        }
+        if (SeeLine.b.Center)
+            straight_fwd();       //sensors bit 2, 0b00100u
         else if (SeeLine.b.Left)
-        {
             spin_left();          //sensors bit 4, 0b10000u
-        }
         else if (SeeLine.b.CntLeft)
-        {
-            turn_left();       //sensors bit 3, 0b01000u
-        }
+            turn_left();          //sensors bit 3, 0b01000u
         else if (SeeLine.b.CntRight) 
-        {
-            turn_right();     //sensors bit 1, 0b00010u
-        }
+            turn_right();        //sensors bit 1, 0b00010u
         else if (SeeLine.b.Right)
-        {
             spin_right();        //sensors bit 0, 0b00001u
-        }
 }
 
 void follow_right_angle_turn(void)
 {
+    unsigned char detect_left_value3, detect_right_value3;
     detect_right_value3 = right_counter3(right_value3);
     detect_left_value3 = left_counter3(left_value3);
     
@@ -111,14 +100,20 @@ void follow_right_angle_turn(void)
         right_counter3(0);
         left_counter3(0);
     }
-    else if (detect_right_value3 == detect_left_value3)
+}
+
+void follow_crossover(void)
+{
+    unsigned char detect_left_value3, detect_right_value3;
+    detect_right_value3 = right_counter3(right_value3);
+    detect_left_value3 = left_counter3(left_value3);
+    
+    if (detect_right_value3 == detect_left_value3)
     {
         straight_fwd;  
         right_counter3(0);
         left_counter3(0);
     }
-//   for (int j = 0; j < 2; j++)      // s
-//        _delay(100000ul);
 }
 
 void follow_acute_angle_turn(void)
