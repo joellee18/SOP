@@ -19,7 +19,7 @@ unsigned char right_counter3(unsigned char right_value3)
 void follow_simple_curves(void)
 {
         if (SeeLine.b.Center)
-            straight_fwd();       //sensors bit 2, 0b00100u
+            straight_forward_fast();       //sensors bit 2, 0b00100u
         else if (SeeLine.b.Left)
             spin_left();          //sensors bit 4, 0b10000u
         else if (SeeLine.b.CntLeft)
