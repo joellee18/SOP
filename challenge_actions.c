@@ -6,7 +6,6 @@ unsigned char left_counter3(unsigned char left_value3)
 {
     if (SeeLine.B == 0b11100u)
         left_value3++;
-    
     return left_value3;
 }
 
@@ -14,7 +13,6 @@ unsigned char right_counter3(unsigned char right_value3)
 {
     if (SeeLine.B == 0b00111u)
         right_value3++;
-
    return right_value3; 
 }
 
@@ -64,7 +62,6 @@ void follow_acute_angle_turn(void)
     {
        straight_forward_slow();
        _delay(100000ul);
-       
        left_acute = 1;
     } 
     
@@ -72,7 +69,6 @@ void follow_acute_angle_turn(void)
     {
        straight_forward_slow();
        _delay(100000ul);
-       
        right_acute = 1;
     }
     
@@ -82,17 +78,11 @@ void follow_acute_angle_turn(void)
          set_motor_speed(right, fast, 0);
          for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
-         
          OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
-
          WriteTimer0(0);
          TMR0IF = 0;
-
          while(!TMR0IF)
-         {
             follow_simple_curves();
-         }
-         
          left_acute = 0;
     }
     
@@ -102,17 +92,11 @@ void follow_acute_angle_turn(void)
          set_motor_speed(right, rev_fast, 0);
          for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
-
          OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
-
          WriteTimer0(0);
          TMR0IF = 0;
-
          while(!TMR0IF)
-         {
             follow_simple_curves();
-         }
-         
          right_acute = 0;
     }
 }
@@ -127,9 +111,7 @@ void follow_gaps_deadends(void)
         WriteTimer0(0);
         TMR0IF = 0;
         while(!TMR0IF)
-        {
             straight_forward_fast(); 
-        }
         none_value++;
     }    
     
@@ -152,7 +134,6 @@ void follow_gaps_deadends(void)
     else
     {
         follow_simple_curves();
-                
         none_value = 0;
     }
 }
@@ -162,7 +143,6 @@ void follow_landing_pad(void)
     if ( SeeLine.B == 0b11111u && all_value > 5 )
     {
         motors_brake_all();
-        
         while(1)
             _delay(100000ul);
     }
@@ -170,19 +150,13 @@ void follow_landing_pad(void)
     if (SeeLine.B == 0b11111u)
     {
         all_value++;
-
         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_8);
-    
         WriteTimer0(0);
         TMR0IF = 0;
         while(!TMR0IF)
-        {
             straight_forward_fast(); 
-        }
     } 
     
     if (SeeLine.B != 0b11111u && all_value > 0)
-    {
-        all_value = 0;
-    }    
+        all_value = 0;  
 }
