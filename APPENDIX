@@ -1,4 +1,4 @@
-#include <xc.h>
+F#include <xc.h>
 #include "sumovore.h"
 #include "motor_control.h"
 
@@ -12,7 +12,7 @@ void follow_gaps(void);
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
 
-unsigned char left_acute = 0, CHERRY = 0, KIWI = 0, none_value = 0;
+unsigned char left_acute = 0, right_acute = 0, KIWI = 0, none_value = 0;
 
 void spin_left(void);
 void turn_left(void);
@@ -114,11 +114,11 @@ void follow_acute_angle_turn(void)
        straight_forward_slow();
        _delay(100000ul);
        
-       CHERRY = 1;
+       right_acute = 1;
     }
 
     
-    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && left_acute == 1 && CHERRY != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && left_acute == 1 && right_acute != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
          set_motor_speed(left, rev_fast, 0); 
          set_motor_speed(right, fast, 0);
@@ -130,7 +130,7 @@ void follow_acute_angle_turn(void)
          left_acute = 0;
     }
     
-    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && CHERRY == 1 && left_acute != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && right_acute == 1 && left_acute != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
          set_motor_speed(left, fast, 0); 
          set_motor_speed(right, rev_fast, 0);
@@ -139,7 +139,7 @@ void follow_acute_angle_turn(void)
 
          follow_simple_curves();
          
-         CHERRY = 0;
+         right_acute = 0;
     }
 
     
@@ -217,7 +217,7 @@ void follow_acute_angle_turn(void)
 void follow_gaps_deadends(void)
 {
     
-    if ((SeeLine.B == 0b00000u) && none_value == 0)     
+    if (SeeLine.B == 0b00000u && none_value == 0 && left_acute == 0 && right_acute == 0)     
     {
 
         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
