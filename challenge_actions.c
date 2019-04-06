@@ -1,4 +1,6 @@
+#include <xc.h>
 #include "challenge_actions.h"
+#include "sumovore.h"
 
 unsigned char left_counter3(unsigned char left_value3)
 {
