@@ -1,0 +1,65 @@
+ if ((SeeLine.B == 0b00000u) && (BANANA == 0) && (CHERRY == 0) && grape == 0)      //we are at a gap or dead end HMMMM?????
+    {
+          OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
+    
+        WriteTimer0(0);
+        TMR0IF = 0;
+        
+        while(!TMR0IF)
+        {
+            
+            straight_forward_slow();
+        }
+        grape = 1;
+    }    
+    
+     if ((SeeLine.B == 0b00000u) && (grape == 1))
+    {
+        motors_brake_all();
+        straight_reverse_fast();
+        for(int i=0; i > 40; i++)
+            _delay(100000ul);
+//        spin_right();
+//        for(int i=0; i > 40; i++)
+//            _delay(100000ul);
+//        grape = 0;
+    }
+    //find out if u at a dead end y'allllll
+    
+            
+//    if ((grape == 1 || grape == 2) && SeeLine.B == 0b00000u)     //this means DEAD END Y'ALL!!!
+//    {
+//        straight_reverse_slow();
+//        
+//        for( int i = 0 ; i < 25 ; i++)
+//            _delay(100000ul);
+//        
+//        grape++;
+//    }
+//    
+//    if (grape == 3 && SeeLine.B == 0b00000u)
+//    {
+//        spin_right();
+//        
+//        for( int i = 0 ; i < 10; i++)
+//            _delay(100000ul);
+//        
+//        grape++;
+//    }
+//    
+//    if (grape == 4 && SeeLine.B == 0b00000u)
+//    {
+//        straight_forward_slow();
+//        for (int i = 0; i <10; i++)
+//            _delay(100000ul);
+//        
+//        grape++;
+//    }
+//    
+//    if (grape == 5 && SeeLine.B != 0b00000u)
+//    {
+//        follow_simple_curves();
+        
+//        grape = 0;
+//    }
+}
