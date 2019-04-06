@@ -40,7 +40,7 @@ void motor_control(void)
     follow_right_angle_turn();
     follow_acute_angle_turn();
     follow_landing_pad(); 
-    //follow_gaps();
+    follow_gaps();
 }
 
 unsigned char left_counter3(unsigned char left_value3)
@@ -100,8 +100,8 @@ void follow_right_angle_turn(void)
         right_counter3(0);
         left_counter3(0);
     }
-//    for (int j = 0; j < 15; j++)      // s
-//             _delay(100000ul);
+//   for (int j = 0; j < 5; j++)      // s
+        _delay(100000ul);
 }
 
 void follow_acute_angle_turn(void)
@@ -133,23 +133,23 @@ void follow_acute_angle_turn(void)
 //        ORANGE = 1;
 //    }
     
-    if ( SeeLine.B == 0b00000u && BANANA == 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( SeeLine.B == 0b00000u && BANANA == 1 && CHERRY != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
          set_motor_speed(left, rev_fast, 0); 
          set_motor_speed(right, fast, 0);
-         for (int j = 0; j < 30; j++)      // 0.5 s
+         for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
-
+         
          follow_simple_curves();
          
          BANANA = 0;
     }
     
-    if ( SeeLine.B == 0b00000u && CHERRY == 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( SeeLine.B == 0b00000u && CHERRY == 1 && BANANA != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
          set_motor_speed(left, fast, 0); 
          set_motor_speed(right, rev_fast, 0);
-         for (int j = 0; j < 30; j++)      // 0.5 s
+         for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
 
          follow_simple_curves();
@@ -191,37 +191,63 @@ void follow_gaps(void)
 //        follow_simple_curves();
 //    }
     
-    if (SeeLine.B == 0b00000u)
+    if ((SeeLine.B == 0b00000u) && (BANANA == 0) && (CHERRY == 0) && grape == 0)      //we are at a gap or dead end HMMMM?????
     {
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
+    
+        WriteTimer0(0);
+        TMR0IF = 0;
+        while(!TMR0IF)
+        {
+            straight_forward_fast(); 
+        }
+        
         grape++;
+    }    
+    
+    //find out if u at a dead end y'allllll
+    
+    else if (grape == 1 && SeeLine.B == 0b00000u)
+    {
+        straight_reverse_slow();
+        for( int i = 0 ; i < 45; i++)
+            _delay(100000ul);
         
-        straight_forward_fast();
-        
-//        for( int i = 0; i <20 ; i++)
-//            _delay(100000ul);
+        grape++;
     }
     
     
-//    if ((SeeLine.B == 0b00000u) && (grape == 1) && (BANANA == 0) && (CHERRY == 0))
-//    {
-//        motors_brake_all();
-//        straight_reverse_fast();
-//        for(int i=0; i > 40; i++)
-//            _delay(100000ul);
-//        spin_right();
-//        for(int i=0; i > 40; i++)
-//            _delay(100000ul);
-//        
-//        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_256);
-//    
-//        WriteTimer0(0);
-//        TMR0IF = 0;
-//        
-//        while(!TMR0IF)
-//        {
-//            straight_forward_slow();
-//        }
-//    }    
+    else if (grape == 2 && SeeLine.B == 0b00000u)
+    {
+        spin_right();
+        for( int i = 0 ; i < 65; i++)
+            _delay(100000ul);
+        
+        grape++;
+    }
+    
+    
+    else if (grape == 3 && SeeLine.B == 0b00000u)
+    {
+        straight_forward_fast();
+        for (int i = 0; i <80; i++)
+            _delay(100000ul);
+        
+        grape++;
+    }
+    
+    else if (grape == 4 && SeeLine.B == 0b00000u)
+    {
+        follow_simple_curves();
+        
+        grape = 0;
+    }
+    
+    else
+    {
+        follow_simple_curves();
+        grape = 0;
+    }
 }
 
 void follow_landing_pad(void)
