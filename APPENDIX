@@ -3,7 +3,7 @@
 #include "motor_control.h"
 
 void follow_simple_curves(void);
-void follow_right_angle_turn(void);
+void follow_right_angle_crossover(void);
 void follow_crossover(void);
 void follow_acute_angle_turn(void);
 void follow_landing_pad(void);
@@ -37,7 +37,7 @@ void motor_control(void)
     left_counter3(left_value3);
     right_counter3(right_value3);
     follow_simple_curves();
-    follow_right_angle_turn();
+    follow_right_angle_crossover();
     follow_acute_angle_turn();
     follow_landing_pad();
     follow_gaps();
@@ -58,15 +58,6 @@ unsigned char right_counter3(unsigned char right_value3)
 
    return right_value3; 
 }
-//
-//unsigned char all_counter(unsigned char all_value)
-//{
-//    if (SeeLine.B == 0b11111u)
-//    {
-//        all_value++;
-//    }
-//    return all_value;
-//}
 
 void follow_simple_curves(void)
 {
@@ -82,7 +73,7 @@ void follow_simple_curves(void)
             spin_right();        //sensors bit 0, 0b00001u
 }
 
-void follow_right_angle_turn(void)
+void follow_right_angle_crossover(void)
 {
     unsigned char detect_left_value3, detect_right_value3;
     detect_right_value3 = right_counter3(right_value3);
@@ -100,15 +91,7 @@ void follow_right_angle_turn(void)
         right_counter3(0);
         left_counter3(0);
     }
-}
-
-void follow_crossover(void)
-{
-    unsigned char detect_left_value3, detect_right_value3;
-    detect_right_value3 = right_counter3(right_value3);
-    detect_left_value3 = left_counter3(left_value3);
-    
-    if (detect_right_value3 == detect_left_value3)
+    else if (detect_right_value3 == detect_left_value3)
     {
         straight_fwd;  
         right_counter3(0);
