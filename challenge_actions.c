@@ -58,7 +58,7 @@ void follow_right_angle_crossover(void)
 
 void follow_acute_angle_turn(void)
 {
-     if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
+    if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
     {
        straight_forward_slow();
        _delay(100000ul);
@@ -73,102 +73,46 @@ void follow_acute_angle_turn(void)
        
        right_acute = 1;
     }
-
     
-    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && left_acute == 1 && right_acute != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( SeeLine.B == 0b00000u && left_acute == 1 && right_acute != 1 )
     {
          set_motor_speed(left, rev_fast, 0); 
          set_motor_speed(right, fast, 0);
-         for (int j = 0; j < 38; j++)      // 0.5 s
+         for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
          
-         follow_simple_curves();
+         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+
+         WriteTimer0(0);
+         TMR0IF = 0;
+
+         while(!TMR0IF)
+         {
+            follow_simple_curves();
+         }
          
          left_acute = 0;
     }
     
-    if ( (SeeLine.B == 0b00100u || SeeLine.B == 0b01000u || SeeLine.B == 0b00010u) && right_acute == 1 && left_acute != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( SeeLine.B == 0b00000u && right_acute == 1 && left_acute != 1 )
     {
          set_motor_speed(left, fast, 0); 
          set_motor_speed(right, rev_fast, 0);
-         for (int j = 0; j < 38; j++)      // 0.5 s
+         for (int j = 0; j < 25; j++)      // 0.5 s
              _delay(100000ul);
 
-         follow_simple_curves();
+         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+
+         WriteTimer0(0);
+         TMR0IF = 0;
+
+         while(!TMR0IF)
+         {
+            follow_simple_curves();
+         }
          
          right_acute = 0;
     }
-
-    
-//    if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
-//    {
-//       straight_forward_slow();
-//       _delay(100000ul);
-//       
-//       left_acute++;
-//    } 
-//    
-//    if ((SeeLine.B == 0b00101u)||(SeeLine.B == 0b01111u))
-//    {
-//       straight_forward_slow();
-//       _delay(100000ul);
-//       
-//       CHERRY++;
-//    }
-//
-//    
-//    if ( SeeLine.B == 0b00000u && (BANANA%2==1) && (CHERRY%2 == 0) && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
-//    {
-//         set_motor_speed(left, rev_fast, 0); 
-//         set_motor_speed(right, fast, 0);
-//         for (int j = 0; j < 38; j++)      // 0.5 s
-//             _delay(100000ul);
-//         
-//         follow_simple_curves();
-//         
-//         BANANA++;
-//    }
-//    
-//    if ( SeeLine.B == 0b00000u && (CHERRY%2 == 1) && (BANANA%2 == 0) && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
-//    {
-//         set_motor_speed(left, fast, 0); 
-//         set_motor_speed(right, rev_fast, 0);
-//         for (int j = 0; j < 38; j++)      // 0.5 s
-//             _delay(100000ul);
-//
-//         follow_simple_curves();
-//         
-//         CHERRY++;
-//    }
-//    
-//    if ((BANANA%2 == 1 || CHERRY %2 == 1))
-//    {
-//        BANANA = 0;
-//        CHERRY = 0;
-//        
-//        follow_gaps();
-//    }
-
-//    if (BANANA == 1 || CHERRY == 1)
-//    {
-//        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
-//
-//        WriteTimer0(0);
-//        TMR0IF = 0;
-//
-//        while(!TMR0IF)
-//        {
-//            follow_simple_curves();
-//        }
-////            for (int i = 0 ; i < 57 ; i++)
-////                _delay(100000ul);
-//        
-//        if (SeeLine.B != 0b00000u)
-//        {
-//            BANANA = 0;
-//            CHERRY = 0;
-//        }
-//    }
 }
 
 void follow_gaps_deadends(void)
