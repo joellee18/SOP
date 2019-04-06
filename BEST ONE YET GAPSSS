@@ -1,16 +1,4 @@
-void follow_gaps(void)
-{
-//    if (SeeLine.B == 0b00000u && grape > 0)
-//    {
-//        motors_brake_all();
-//    }
-//    
-//    if (SeeLine.B == 0b00000u && grape > 0)
-//    {
-//        follow_simple_curves();
-//    }
-    
-    if ((SeeLine.B == 0b00000u) && (BANANA == 0) && (CHERRY == 0) && grape == 0)      //we are at a gap or dead end HMMMM?????
+ if ((SeeLine.B == 0b00000u) && (BANANA == 0) && (CHERRY == 0) && grape == 0)      //we are at a gap or dead end HMMMM?????
     {
         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
     
@@ -26,7 +14,7 @@ void follow_gaps(void)
     
     //find out if u at a dead end y'allllll
     
-    if (grape == 1 && SeeLine.B == 0b00000u)
+    else if (grape == 1 && SeeLine.B == 0b00000u)
     {
         straight_reverse_slow();
         for( int i = 0 ; i < 45; i++)
@@ -55,12 +43,19 @@ void follow_gaps(void)
         grape++;
     }
     
-    else if (grape == 4)
+    else if (grape == 4 && SeeLine.B == 0b00000u)
     {
         follow_simple_curves();
         
         grape = 0;
     }
+    
+    else
+    {
+        follow_simple_curves();
+        grape = 0;
+    }
+}
     
     else
         follow_simple_curves();
