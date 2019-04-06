@@ -15,23 +15,7 @@ unsigned char right_counter3(unsigned char right_value3);
 
 unsigned char left_acute = 0, right_acute = 0, all_value = 0, none_value = 0;
 
-void spin_left(void);
-void turn_left(void);
-void straight_fwd(void);
-void turn_right(void);
-void spin_right(void);
-
-void straight_forward_fast(void);
-void straight_forward_medium(void);
-void straight_forward_slow(void);
-void straight_stop(void);
-void straight_reverse_slow(void);
-void straight_reverse_medium(void);
-void straight_reverse_fast(void);
-void default_settings(void);
-
 unsigned char left_value3 = 0, right_value3 = 0;
-
 
 void motor_control(void)
 {   
