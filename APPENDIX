@@ -31,7 +31,6 @@ void default_settings(void);
 
 unsigned char left_value3 = 0, right_value3 = 0;
 
-
 void motor_control(void)
 {   
     left_counter3(left_value3);
