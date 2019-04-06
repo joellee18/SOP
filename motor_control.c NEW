@@ -1,6 +1,7 @@
 #include <xc.h>
 #include "sumovore.h"
 #include "motor_control.h"
+#include "speed.h"
 
 void follow_simple_curves(void);
 void follow_right_angle_turn(void);
@@ -11,7 +12,7 @@ void follow_gaps(void);
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
 
-unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0, grape = 0, tomato = 0;
+unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0, grape = 0, tomato = 0, berry;
 
 unsigned char left_value3 = 0, right_value3 = 0;
 unsigned char detect_left_value3 = 0, detect_right_value3 = 0;
@@ -118,44 +119,113 @@ void follow_acute_angle_turn(void)
 //        ORANGE = 1;
 //    }
     
-    if ( SeeLine.B == 0b00000u && BANANA == 1 && CHERRY != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( BANANA == 1 && CHERRY != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
-         set_motor_speed(left, rev_fast, 0); 
-         set_motor_speed(right, fast, 0);
-         for (int j = 0; j < 25; j++)      // 0.5 s
-             _delay(100000ul);
-         
-         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
-
-         WriteTimer0(0);
-         TMR0IF = 0;
-
-         while(!TMR0IF)
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            berry = 1;
+        }
+        
+        if (berry == 1)
          {
-            follow_simple_curves();
+            set_motor_speed(left, rev_fast, 0); 
+            set_motor_speed(right, fast, 0);
+            for (int j = 0; j < 25; j++)      // 0.5 s
+            _delay(100000ul);
+         }
+        
+        if (SeeLine.B != 0b00000u || berry != 1)
+        {
+            OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+
+            WriteTimer0(0);
+            TMR0IF = 0;
+
+            while(!TMR0IF)
+            {
+               follow_simple_curves();
+            }
+        }
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            berry = 1;
+        }
+         
+         if (berry == 1)
+         {
+            set_motor_speed(left, rev_fast, 0); 
+            set_motor_speed(right, fast, 0);
+            for (int j = 0; j < 25; j++)      // 0.5 s
+            _delay(100000ul);
          }
          
          BANANA = 0;
+         berry =0;
     }
     
-    if ( SeeLine.B == 0b00000u && CHERRY == 1 && BANANA != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    if ( CHERRY == 1 && BANANA != 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
     {
-         set_motor_speed(left, fast, 0); 
-         set_motor_speed(right, rev_fast, 0);
-         for (int j = 0; j < 25; j++)      // 0.5 s
-             _delay(100000ul);
-
-         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
-
-         WriteTimer0(0);
-         TMR0IF = 0;
-
-         while(!TMR0IF)
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        _delay(100000ul);
+        
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            berry = 1;
+        }
+        
+        if (berry == 1)
          {
-            follow_simple_curves();
+            set_motor_speed(left, rev_fast, 0); 
+            set_motor_speed(right, fast, 0);
+            for (int j = 0; j < 25; j++)      // 0.5 s
+            _delay(100000ul);
          }
-         
+        
+        if (SeeLine.B != 0b00000u || berry != 1)
+        {
+            OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);     //1 second
+
+            WriteTimer0(0);
+            TMR0IF = 0;
+
+            while(!TMR0IF)
+            {
+               follow_simple_curves();
+            }
+        }
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            berry = 1;
+        }
+
+         if (berry == 1)
+         {
+            set_motor_speed(left, fast, 0); 
+            set_motor_speed(right, rev_fast, 0);
+            for (int j = 0; j < 25; j++)      // 0.5 s
+            _delay(100000ul);
+         }
+             
          CHERRY = 0;
+         berry = 0;
     }
 
 //    if (BANANA == 1 || CHERRY == 1)
