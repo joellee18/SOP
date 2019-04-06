@@ -1,6 +1,7 @@
-F#include <xc.h>
+#include <xc.h>
 #include "sumovore.h"
 #include "motor_control.h"
+#include "speed.h"
 
 void follow_simple_curves(void);
 void follow_right_angle_crossover(void);
