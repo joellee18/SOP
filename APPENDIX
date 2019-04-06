@@ -13,7 +13,7 @@ void follow_gaps(void);
 unsigned char left_counter3(unsigned char left_value3);
 unsigned char right_counter3(unsigned char right_value3);
 
-unsigned char left_acute = 0, right_acute = 0, KIWI = 0, none_value = 0;
+unsigned char left_acute = 0, right_acute = 0, all_value = 0, none_value = 0;
 
 void spin_left(void);
 void turn_left(void);
@@ -257,7 +257,7 @@ void follow_gaps_deadends(void)
 
 void follow_landing_pad(void)
 {
-    if ( SeeLine.B == 0b11111u && KIWI > 5 )
+    if ( SeeLine.B == 0b11111u && all_value > 5 )
     {
         motors_brake_all();
         
@@ -267,9 +267,7 @@ void follow_landing_pad(void)
     
     if (SeeLine.B == 0b11111u)
     {
-        KIWI++;
-        
-        straight_forward_slow(); 
+        all_value++;
 
         OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_8);
     
@@ -281,9 +279,9 @@ void follow_landing_pad(void)
         }
     } 
     
-    if (SeeLine.B != 0b11111u && KIWI > 0)
+    if (SeeLine.B != 0b11111u && all_value > 0)
     {
-        KIWI = 0;
+        all_value = 0;
     }    
 }
 
