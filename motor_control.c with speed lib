@@ -1,7 +1,6 @@
 #include <xc.h>
 #include "sumovore.h"
 #include "motor_control.h"
-#include "speed.h"
 
 void follow_simple_curves(void);
 void follow_right_angle_turn(void);
@@ -14,8 +13,6 @@ unsigned char right_counter3(unsigned char right_value3);
 
 unsigned char BANANA = 0, CHERRY = 0, KIWI = 0, berry = 0, grape = 0;
 
-
-
 unsigned char left_value3 = 0, right_value3 = 0;
 unsigned char detect_left_value3 = 0, detect_right_value3 = 0;
 
@@ -24,50 +21,11 @@ void motor_control(void)
 {   
     left_counter3(left_value3);
     right_counter3(right_value3);
-
-    switch(SeeLine.B)
-    {
-        case 0b00100u:
-        case 0b00010u:
-        case 0b01000u:
-        case 0b00001u:
-        case 0b10000u:
-            //no breaks all above readings end up here
-            follow_simple_curves();
-            break;
-        
-        
-        case 0b00000u:
-            follow_gaps();
-            break;
-        
-        //maybe split acute angle turn into separate left and right functions?
-        case 0b10100u:
-        case 0b11110u:
-        case 0b00101u:
-        case 0b01111u:
-            follow_acute_angle_turn();
-            break;
-            
-        case 0b11100u:
-        case 0b00111u:
-        case 0b00011u:
-        case 0b11000u:
-            follow_right_angle_turn();          //SEE SUBPROGRAM
-            break;
-            
-        case 0b11111u:
-            follow_landing_pad();
-            break;
-    }
-             
-
-//    follow_simple_curves();
-//    follow_right_angle_turn();
-//    follow_acute_angle_turn();
-//    follow_landing_pad();
-//    follow_gaps();
-    
+    follow_simple_curves();
+    follow_right_angle_turn();
+    follow_acute_angle_turn();
+    follow_landing_pad();
+    follow_gaps();
 }
 
 unsigned char left_counter3(unsigned char left_value3)
@@ -150,7 +108,7 @@ void follow_right_angle_turn(void)
 
 void follow_acute_angle_turn(void)
 {
-    if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
+     if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
     {
        straight_forward_slow();
        _delay(100000ul);
@@ -165,30 +123,52 @@ void follow_acute_angle_turn(void)
        
        CHERRY = 1;
     }
-    
-    if ( SeeLine.B == 0b00000u && BANANA == 1 && CHERRY != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
-    {
-         set_motor_speed(left, rev_fast, 0); 
-         set_motor_speed(right, fast, 0);
-         for (int j = 0; j < 38; j++)      // 0.5 s
-             _delay(100000ul);
-         
-         follow_simple_curves();
-         
-         BANANA = 0;
-    }
-    
-    if ( SeeLine.B == 0b00000u && CHERRY == 1 && BANANA != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
-    {
-         set_motor_speed(left, fast, 0); 
-         set_motor_speed(right, rev_fast, 0);
-         for (int j = 0; j < 38; j++)      // 0.5 s
-             _delay(100000ul);
 
-         follow_simple_curves();
-         
-         CHERRY = 0;
+    
+    if (BANANA == 1 && CHERRY != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    {        
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
+        WriteTimer0(0);
+        TMR0IF = 0;
+        while(!TMR0IF && SeeLine.B != 0b00000u)
+        {
+            straight_forward_fast(); 
+        }
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            set_motor_speed(left, rev_fast, 0); 
+            set_motor_speed(right, fast, 0);
+            for (int j = 0; j < 38; j++)      // 0.5 s
+                _delay(100000ul);
+
+            follow_simple_curves();
+        }
+        BANANA = 0;
     }
+     
+    if (CHERRY == 1 && BANANA != 1 && grape == 0)     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    {        
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
+        WriteTimer0(0);
+        TMR0IF = 0;
+        while(!TMR0IF && SeeLine.B != 0b00000u)
+        {
+            straight_forward_fast(); 
+        }
+        
+        if (SeeLine.B == 0b00000u)
+        {
+            set_motor_speed(left, fast, 0); 
+            set_motor_speed(right, rev_fast, 0);
+            for (int j = 0; j < 38; j++)      // 0.5 s
+                _delay(100000ul);
+
+            follow_simple_curves();
+        }
+        CHERRY = 0;
+    }
+
     
 //    if ((SeeLine.B == 0b10100u)||(SeeLine.B == 0b11110u))
 //    {
@@ -273,7 +253,7 @@ void follow_gaps(void)
 //        follow_simple_curves();
 //    }
     
-    if ((SeeLine.B == 0b00000u) && grape == 0)      //we are at a gap or dead end HMMMM?????
+    if ((SeeLine.B == 0b00000u) && BANANA == 0 && CHERRY == 0 && grape == 0)      //we are at a gap or dead end HMMMM?????
     {
 
         straight_forward_fast(); 
@@ -360,4 +340,3 @@ void follow_landing_pad(void)
         KIWI = 0;
     }    
 }
-
