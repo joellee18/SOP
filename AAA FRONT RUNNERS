@@ -1,0 +1,324 @@
+#include <xc.h>
+#include "sumovore.h"
+#include "motor_control.h"
+
+void follow_simple_curves(void);
+void follow_right_angle_turn(void);
+void follow_acute_angle_turn(void);
+void follow_landing_pad(void);
+void follow_gaps(void);
+
+
+unsigned char left_counter3(unsigned char left_value3);
+unsigned char right_counter3(unsigned char right_value3);
+
+unsigned char BANANA = 0, CHERRY = 0, APPLE = 0, ORANGE = 0, KIWI = 0, MANGO = 0;
+unsigned char grape = 0, berry = 0;
+
+void spin_left(void);
+void turn_left(void);
+void straight_fwd(void);
+void turn_right(void);
+void spin_right(void);
+
+void straight_forward_fast(void);
+void straight_forward_medium(void);
+void straight_forward_slow(void);
+void straight_stop(void);
+void straight_reverse_slow(void);
+void straight_reverse_medium(void);
+void straight_reverse_fast(void);
+void default_settings(void);
+
+unsigned char left_value2 = 0, right_value2 = 0, left_value3 = 0, right_value3 = 0, all_value = 0, none_value = 0;
+unsigned char detect_left_value2 = 0, detect_right_value2 = 0, detect_left_value3 = 0, detect_right_value3 = 0, detect_all_value = 0, detect_none_value = 0;
+
+
+void motor_control(void)
+{   
+    left_counter3(left_value3);
+    right_counter3(right_value3); 
+    
+    follow_simple_curves();
+    follow_right_angle_turn();
+    follow_acute_angle_turn();
+    follow_landing_pad();
+    follow_gaps();
+        
+}
+
+unsigned char left_counter3(unsigned char left_value3)
+{
+    if (SeeLine.B == 0b11100u)
+        left_value3++;
+    
+    return left_value3;
+}
+
+unsigned char right_counter3(unsigned char right_value3)
+{
+    if (SeeLine.B == 0b00111u)
+        right_value3++;
+
+   return right_value3; 
+}
+
+void follow_simple_curves(void)
+{
+     if ( SeeLine.b.Center ) straight_fwd();        //sensors bit 2, 0b00100u
+     else if (SeeLine.b.Left) spin_left();          //sensors bit 4, 0b10000u
+     else if (SeeLine.b.CntLeft) turn_left();       //sensors bit 3, 0b01000u
+     else if (SeeLine.b.CntRight) turn_right();     //sensors bit 1, 0b00010u
+     else if (SeeLine.b.Right) spin_right();        //sensors bit 0, 0b00001u
+}
+
+void follow_right_angle_turn(void)
+{
+    detect_right_value3 = right_counter3(right_value3);
+    detect_left_value3 = left_counter3(left_value3);
+    
+    if (detect_right_value3 > detect_left_value3)
+    {
+        spin_right;
+        right_counter3(0);
+        left_counter3(0);
+    }
+    else if (detect_right_value3 < detect_left_value3)
+    {
+        spin_left;
+        right_counter3(0);
+        left_counter3(0);
+    }
+    else if (detect_right_value3 == detect_left_value3)
+    {
+        straight_fwd;  
+        right_counter3(0);
+        left_counter3(0);
+    }
+
+}
+
+void follow_acute_angle_turn(void)
+{
+    if (SeeLine.B == 0b10100u)
+    {
+       straight_forward_slow();
+       _delay(100000ul);
+       
+       BANANA = 1;
+    } 
+    
+    if (SeeLine.B == 0b00101u)
+    {
+       straight_forward_slow();
+       _delay(100000ul);
+       
+       CHERRY = 1;
+    }
+    
+//    if (SeeLine.B == 0b11100u)
+//    {
+//        APPLE = 1;
+//    }
+//    
+//    if (SeeLine.B == 0b11101u)
+//    {
+//        ORANGE = 1;
+//    }
+//    
+    if ( SeeLine.B == 0b00000u && BANANA == 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    {
+         set_motor_speed(left, rev_fast, 0); 
+         set_motor_speed(right, fast, 0);
+         for (int j = 0; j < 35; j++)      // 0.5 s
+             _delay(100000ul);
+
+         follow_simple_curves();
+         
+         BANANA = 0;
+    }
+    
+    if ( SeeLine.B == 0b00000u && CHERRY == 1 )     //SPLIT BANANA  AND CHERRY INTO 2 IF'S
+    {
+         set_motor_speed(left, fast, 0); 
+         set_motor_speed(right, rev_fast, 0);
+         for (int j = 0; j < 35; j++)      // 0.5 s
+             _delay(100000ul);
+
+         follow_simple_curves();
+         
+         CHERRY = 0;
+    }
+}
+
+void follow_gaps(void)
+{
+    
+    if ((SeeLine.B == 0b00000u) && (grape == 0))
+    {
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_128);
+        WriteTimer0(21845);
+        TMR0IF = 0;
+        
+        while(!TMR0IF)
+        {
+            
+            straight_forward_fast();
+        }
+        grape = 1;
+        berry = 0;
+    }
+//    
+//    if (grape == 2)
+//    {
+//        spin_right();
+//        for(int i=0; i > 55; i++)
+//            _delay(100000ul);
+//        grape = 0;
+//    }
+//    
+    if ((SeeLine.B == 0b00000u) && (grape == 1) && (berry == 0))
+    {
+        straight_reverse_fast();
+        for(int i=0; i > 55; i++)
+            _delay(100000ul);
+//        grape = 0;
+    }   
+    
+    if ((SeeLine.B != 0b00000u) && (grape == 1))
+    {
+        grape = 0;
+        berry = 1;
+    }
+
+}
+
+void follow_landing_pad(void)
+{
+    if ( SeeLine.B == 0b11111u && KIWI > 5 )
+    {
+        motors_brake_all();
+        
+        while(1)
+            _delay(100000ul);
+    }
+    
+    if (SeeLine.B == 0b11111u)
+    {
+        KIWI++;
+        
+        straight_forward_slow(); 
+
+        OpenTimer0(TIMER_INT_OFF & T0_SOURCE_INT & T0_16BIT & T0_PS_1_8);
+    
+        WriteTimer0(0);
+        TMR0IF = 0;
+        while(!TMR0IF)
+        {
+            straight_forward_fast(); 
+        }
+    } 
+    
+    if (SeeLine.B != 0b11111u && KIWI > 0)
+    {
+        KIWI = 0;
+    }    
+}
+
+
+void spin_left(void)
+{
+  set_motor_speed(left, rev_fast, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+
+void turn_left(void)
+{
+  set_motor_speed(left, stop, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+void straight_fwd(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, fast, 0); 
+}
+void spin_right(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, rev_fast, 0); 
+}
+void turn_right(void)
+{
+  set_motor_speed(left, fast, 0); 
+  set_motor_speed(right, stop, 0); 
+}
+
+//void spin_left(void)
+//{
+//  set_motor_speed(left, rev_fast, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//
+//void turn_left(void)
+//{
+//  set_motor_speed(left, stop, 0); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void straight_fwd(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, fast, 0); //
+//}
+//void spin_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, rev_fast, 0); //
+//}
+//void turn_right(void)
+//{
+//  set_motor_speed(left, fast, -100); //
+//  set_motor_speed(right, stop, 0); //
+//}
+//******
+
+void straight_forward_fast(void)
+{
+    set_motor_speed(left, fast, -100); 
+    set_motor_speed(right, fast, 0);
+}
+
+void straight_forward_medium(void)
+{
+    set_motor_speed(left, medium, -100); 
+    set_motor_speed(right, medium, -120);
+}
+
+void straight_forward_slow(void)
+{
+    set_motor_speed(left, slow, -100); 
+    set_motor_speed(right, slow, -117);
+}
+
+void straight_stop(void)
+{
+    set_motor_speed(left, stop, 0); 
+    set_motor_speed(right, stop, 0);
+}
+
+void straight_reverse_slow(void)
+{
+    set_motor_speed(left, rev_slow, 100); 
+    set_motor_speed(right, rev_slow, 130);
+}
+
+void straight_reverse_medium(void)
+{
+    set_motor_speed(left, rev_medium, 100); 
+    set_motor_speed(right, rev_medium, 127);
+}
+
+void straight_reverse_fast(void)
+{
+    set_motor_speed(left, rev_fast, 0); 
+    set_motor_speed(right, rev_fast, 0);
+}
